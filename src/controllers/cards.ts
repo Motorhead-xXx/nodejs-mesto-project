@@ -8,6 +8,18 @@ import { NotFoundError } from '../errors/NotFoundError';
 import Card from '../models/card';
 import { mapMongooseError } from '../utils/mongooseErrors';
 
+async function updateCardLikes(
+  cardId: string,
+  userId: string,
+  operator: '$addToSet' | '$pull',
+) {
+  return Card.findByIdAndUpdate(
+    cardId,
+    { [operator]: { likes: userId } },
+    { new: true },
+  );
+}
+
 export const getCards = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const cards = await Card.find({});
@@ -49,11 +61,7 @@ export const deleteCard = async (req: Request, res: Response, next: NextFunction
 
 export const likeCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const card = await Card.findByIdAndUpdate(
-      req.params.cardId,
-      { $addToSet: { likes: req.user._id } },
-      { new: true },
-    );
+    const card = await updateCardLikes(req.params.cardId, req.user._id, '$addToSet');
     if (!card) {
       return next(new NotFoundError(messages.CARD_NOT_FOUND));
     }
@@ -65,11 +73,7 @@ export const likeCard = async (req: Request, res: Response, next: NextFunction) 
 
 export const dislikeCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const card = await Card.findByIdAndUpdate(
-      req.params.cardId,
-      { $pull: { likes: req.user._id } },
-      { new: true },
-    );
+    const card = await updateCardLikes(req.params.cardId, req.user._id, '$pull');
     if (!card) {
       return next(new NotFoundError(messages.CARD_NOT_FOUND));
     }

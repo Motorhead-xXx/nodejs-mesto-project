@@ -1,4 +1,6 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
+import validator from 'validator';
+import { INVALID_URL } from '../constants/errorMessages';
 
 export interface ICard extends Document {
   name: string;
@@ -18,6 +20,10 @@ const cardSchema = new Schema<ICard>({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator: (v: string) => validator.isURL(v, { protocols: ['http', 'https'], require_protocol: true }),
+      message: INVALID_URL,
+    },
   },
   owner: {
     type: Schema.Types.ObjectId,

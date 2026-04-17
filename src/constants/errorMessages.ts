@@ -8,3 +8,4 @@ export const AUTH_REQUIRED = 'Необходима авторизация';
 export const INVALID_TOKEN = 'Некорректный токен';
 export const FORBIDDEN_DELETE_CARD = 'Нельзя удалить чужую карточку';
 export const EMAIL_ALREADY_EXISTS = 'Пользователь с таким email уже зарегистрирован';
+export const INVALID_URL = 'Некорректный URL';

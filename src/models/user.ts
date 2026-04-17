@@ -1,4 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import validator from 'validator';
+import { INVALID_URL } from '../constants/errorMessages';
 
 const DEFAULT_NAME = 'Егор Летов';
 const DEFAULT_ABOUT = 'Музыкант';
@@ -38,6 +40,10 @@ const userSchema = new Schema<IUser>({
   avatar: {
     type: String,
     default: DEFAULT_AVATAR,
+    validate: {
+      validator: (v: string) => validator.isURL(v, { protocols: ['http', 'https'], require_protocol: true }),
+      message: INVALID_URL,
+    },
   },
 }, { versionKey: false });
 

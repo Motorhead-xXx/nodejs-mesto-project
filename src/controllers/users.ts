@@ -11,6 +11,12 @@ import User from '../models/user';
 import { mapMongooseError } from '../utils/mongooseErrors';
 import { JWT_SECRET } from '../middlewares/auth';
 
+type CurrentUserFields = Partial<{ name: string; about: string; avatar: string }>;
+
+async function updateCurrentUser(userId: string, fields: CurrentUserFields) {
+  return User.findByIdAndUpdate(userId, fields, { new: true, runValidators: true });
+}
+
 export const getUsers = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await User.find({});
@@ -88,11 +94,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, about } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { name, about },
-      { new: true, runValidators: true },
-    );
+    const user = await updateCurrentUser(req.user._id, { name, about });
     if (!user) {
       return next(new NotFoundError(messages.USER_NOT_FOUND));
     }
@@ -105,11 +107,7 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
 export const updateAvatar = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { avatar } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { avatar },
-      { new: true, runValidators: true },
-    );
+    const user = await updateCurrentUser(req.user._id, { avatar });
     if (!user) {
       return next(new NotFoundError(messages.USER_NOT_FOUND));
     }
