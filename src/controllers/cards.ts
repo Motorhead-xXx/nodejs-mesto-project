@@ -1,21 +1,23 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import {
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_NOT_FOUND,
 } from '../constants/httpStatus';
+import * as messages from '../constants/errorMessages';
+import { ForbiddenError } from '../errors/ForbiddenError';
+import { NotFoundError } from '../errors/NotFoundError';
 import Card from '../models/card';
-import { handleControllerError, sendError } from '../utils/handleError';
+import { mapMongooseError } from '../utils/mongooseErrors';
 
-export const getCards = async (_req: Request, res: Response) => {
+export const getCards = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const cards = await Card.find({});
     return res.send(cards);
   } catch (err) {
-    return handleControllerError(err, res);
+    return next(mapMongooseError(err));
   }
 };
 
-export const createCard = async (req: Request, res: Response) => {
+export const createCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, link } = req.body;
     const card = await Card.create({
@@ -25,23 +27,27 @@ export const createCard = async (req: Request, res: Response) => {
     });
     return res.status(HTTP_STATUS_CREATED).send(card);
   } catch (err) {
-    return handleControllerError(err, res);
+    return next(mapMongooseError(err));
   }
 };
 
-export const deleteCard = async (req: Request, res: Response) => {
+export const deleteCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const card = await Card.findByIdAndDelete(req.params.cardId);
+    const card = await Card.findById(req.params.cardId);
     if (!card) {
-      return sendError(res, HTTP_STATUS_NOT_FOUND, 'Карточка с указанным _id не найдена');
+      return next(new NotFoundError(messages.CARD_NOT_FOUND));
     }
+    if (card.owner.toString() !== req.user._id) {
+      return next(new ForbiddenError(messages.FORBIDDEN_DELETE_CARD));
+    }
+    await Card.findByIdAndDelete(req.params.cardId);
     return res.send(card);
   } catch (err) {
-    return handleControllerError(err, res);
+    return next(mapMongooseError(err));
   }
 };
 
-export const likeCard = async (req: Request, res: Response) => {
+export const likeCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -49,15 +55,15 @@ export const likeCard = async (req: Request, res: Response) => {
       { new: true },
     );
     if (!card) {
-      return sendError(res, HTTP_STATUS_NOT_FOUND, 'Карточка с указанным _id не найдена');
+      return next(new NotFoundError(messages.CARD_NOT_FOUND));
     }
     return res.send(card);
   } catch (err) {
-    return handleControllerError(err, res);
+    return next(mapMongooseError(err));
   }
 };
 
-export const dislikeCard = async (req: Request, res: Response) => {
+export const dislikeCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -65,10 +71,10 @@ export const dislikeCard = async (req: Request, res: Response) => {
       { new: true },
     );
     if (!card) {
-      return sendError(res, HTTP_STATUS_NOT_FOUND, 'Карточка с указанным _id не найдена');
+      return next(new NotFoundError(messages.CARD_NOT_FOUND));
     }
     return res.send(card);
   } catch (err) {
-    return handleControllerError(err, res);
+    return next(mapMongooseError(err));
   }
 };

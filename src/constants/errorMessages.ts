@@ -1,0 +1,10 @@
+export const INCORRECT_DATA = 'Переданы некорректные данные';
+export const USER_NOT_FOUND = 'Запрашиваемый пользователь не найден';
+export const CARD_NOT_FOUND = 'Карточка с указанным _id не найдена';
+export const RESOURCE_NOT_FOUND = 'Запрашиваемый ресурс не найден';
+export const SERVER_ERROR = 'На сервере произошла ошибка';
+export const INVALID_CREDENTIALS = 'Неправильные почта или пароль';
+export const AUTH_REQUIRED = 'Необходима авторизация';
+export const INVALID_TOKEN = 'Некорректный токен';
+export const FORBIDDEN_DELETE_CARD = 'Нельзя удалить чужую карточку';
+export const EMAIL_ALREADY_EXISTS = 'Пользователь с таким email уже зарегистрирован';

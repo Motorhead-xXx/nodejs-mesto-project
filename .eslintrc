@@ -30,6 +30,8 @@
         ]
     },
     "rules": {
+      "import/prefer-default-export": "off",
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
         "import/extensions": [
             "error",
             "ignorePackages",
